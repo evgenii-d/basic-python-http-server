@@ -67,7 +67,7 @@ jobs:
         pip install pyinstaller
     
     - name: Create a one-file bundled executable
-      run: pyinstaller -n app_${{ needs.check_build_number.outputs.number }}_${{ runner.os }} -F src/main.py
+      run: pyinstaller -n bphs_${{ needs.check_build_number.outputs.number }}_${{ runner.os }} -F src/main.py
 
     - name: Upload executable
       uses: actions/upload-artifact@v4
