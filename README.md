@@ -8,15 +8,18 @@ No additional dependencies required.
 
 One-file bundled executable can be downloaded from the **Releases** section.
 
+Tested on Windows 10/11, Ubuntu 22.04.
+
 ## Usage
 
 ```txt
-bphs [-h] [-p] [-d] [-l]
+bphs [-h] [-p PORT] [-d PATH] [-l] [--cors]
 
--h, --help     show help message and exit
--p, --port     port to use [8080]
--d, --dir      directory to serve [current directory]
--l, --listing  enable directory listing
+-h, --help            show help message and exit
+-p PORT, --port PORT  port to use [8080]
+-d PATH, --dir PATH   directory to serve [current directory]
+-l, --listing         enable directory listing
+--cors                enable CORS headers
 ```
 
 [1]: https://github.com/python/cpython/blob/3.12/Lib/http/server.py
