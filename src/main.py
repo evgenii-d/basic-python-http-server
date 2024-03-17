@@ -32,8 +32,15 @@ class BasicHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def __init__(self, *handler_args, **handler_kwargs) -> None:
         self.dir_listing = handler_kwargs.pop('dir_listing', False)
+        self.enable_cors = handler_kwargs.pop('enable_cors', False)
         super().__init__(*handler_args, **handler_kwargs)
         self.follow_symlinks = False
+
+    def end_headers(self):
+        """ Allow requests from any origin """
+        if self.enable_cors:
+            self.send_header('Access-Control-Allow-Origin', '*')
+        super().end_headers()
 
     # https://en.wikipedia.org/wiki/List_of_Unicode_characters#Control_codes
     _control_char_table = str.maketrans({c: fr'\x{c:02x}' for c in
@@ -55,7 +62,7 @@ class BasicHTTPRequestHandler(SimpleHTTPRequestHandler):
         return super().list_directory(path)
 
 
-def basic_http_server(port: int, public_dir: Path, dir_listing: bool) -> None:
+def basic_http_server(port: int, public_dir: Path, dir_listing: bool, cors: bool) -> None:
     """ Starts a basic HTTP server """
     if not public_dir.exists() or not public_dir.is_dir():
         logging.error("Directory \"%s\" doesn't exist", public_dir)
@@ -64,7 +71,8 @@ def basic_http_server(port: int, public_dir: Path, dir_listing: bool) -> None:
     logging.info("Initializing Basic HTTP Server")
     try:
         httpd = ThreadingBasicServer(("", port), partial(
-            BasicHTTPRequestHandler, directory=public_dir, dir_listing=dir_listing))
+            BasicHTTPRequestHandler, directory=public_dir,
+            dir_listing=dir_listing, enable_cors=cors))
 
         logging.info("Available on port %s", port)
         httpd.serve_forever()
@@ -79,14 +87,16 @@ def parse_arguments() -> argparse.Namespace:
         formatter_class=CustomHelpFormatter
     )
 
-    parser.add_argument("-p", "--port", metavar="",
+    parser.add_argument("-p", "--port",
                         default=8080, type=int,
                         help="port to use [8080]")
-    parser.add_argument("-d", "--dir", metavar="",
+    parser.add_argument("-d", "--dir", metavar="PATH",
                         default=Path(os.getcwd()), type=Path,
                         help="directory to serve [current directory]")
     parser.add_argument("-l", "--listing", action="store_true",
                         help="enable directory listing")
+    parser.add_argument("--cors", action="store_true",
+                        help="enable CORS headers")
     return parser.parse_args()
 
 
@@ -94,6 +104,6 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     try:
-        basic_http_server(args.port, args.dir, args.listing)
+        basic_http_server(args.port, args.dir, args.listing, args.cors)
     except KeyboardInterrupt:
         logging.info("Basic HTTP Server stopped")

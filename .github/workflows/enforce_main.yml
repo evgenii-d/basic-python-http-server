@@ -1,0 +1,16 @@
+name: Enforce Main Branch
+
+on:
+  pull_request:
+    branches: main
+
+jobs:
+  check_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce main branch on pull requests
+        if: github.head_ref != 'dev'
+        run: |
+          echo "Merge to main branch allowed only from dev"
+          exit 1
+          
